@@ -168,6 +168,7 @@ def step3_text_filtering():
         else:
             patterns[k] = pos
             pos += 1
+
     print(pos)
     print(len(patterns))
 

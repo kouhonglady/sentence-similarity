@@ -7,6 +7,7 @@ from sklearn.externals import joblib
 import pandas as pd
 import xlrd
 
+
 root_path = r'E:\study\hrg_project\environment\dataset\precision_data'
 patten_path = root_path + r'/dataset/word_to_pattern.txt'
 pairs_features = root_path + r"/dataset/pairs_features.txt"
