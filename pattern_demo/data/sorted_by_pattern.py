@@ -11,7 +11,7 @@ root_path = r'E:\study\hrg_project\environment\dataset\precision_data'
 patten_path = root_path + r'/dataset/word_to_pattern.txt'
 pairs_features = root_path + r"/dataset/pairs_features.txt"
 final_pattern = root_path + r'/dataset/final_pattern.txt'
-model_path = root_path + r'/model.txt'
+model_path = root_path + r'/model_weizhong.txt'
 
 def step1_cutword_to_pattern(data):
     dataset = data
@@ -73,39 +73,16 @@ def main():
 
     length = len(dataset)
     q1_result = []
-    q1_original = []
     q2_result = []
     q2_original = []
 
 
     for i in range(length):
         sten1 = dataset.ix[i][2].strip('_').split("_")
-        q1_original.append(sten1[0])
-        # print(sten1)
-        sten2 = []
-        for j in range(len(sten1)):
-            sten2.append(dataset.ix[i][0])
-        # print(sten2)
-        sentence1_words = step1_cutword_to_pattern(sten1)
-        # print(sentence1_words)
-        sentence2_words = step1_cutword_to_pattern(sten2)
-        sen_pattern = step2_cut_top_word(sentence1_words,sentence2_words)
-        # print(sen_pattern)
-        data = step3_text_filtering(sen_pattern,patterns)
-        #print(data)
-        LogisticRegression_y_pred = cls.predict(data)
-        print(LogisticRegression_y_pred)
-        leng = len(LogisticRegression_y_pred)
-        for k in range(leng):
-            if 1 == LogisticRegression_y_pred[k]:
-                q1_result.append(sten1[k])
-                break;
-        if k == leng-1 and len(q1_result) < i:
-            q1_result.append(sten1[0])
-        print("the %d  %d q2 sentence " % (i, len(q1_result)))
+        q1_result.append(sten1[0])
 
     for i in range(length):
-        sten1 = dataset.ix[i][3].split("_")
+        sten1 = dataset.ix[i][3].strip('_').split("_")
         q2_original.append(sten1[0])
         sten2 = []
         for j in range(len(sten1)):
@@ -124,22 +101,20 @@ def main():
                 q2_result.append(sten1[0])
         print("the %d  %d q1 sentence " % (i, len(q2_result)))
 
-    ser1 = pd.Series(q1_result)
-    ser2 = pd.Series(q2_result)
-    ser1.append(ser2).to_csv("temp.csv")
-
     count = 0
     count_original = 0
     print(len(q1_result))
     print(len(q2_result))
     for i in range(len(q1_result)):
-        print("%d : %s --- %s "%(count,q1_result[i],q2_result[i]))
         if q1_result[i] == q2_result[i]:
             count += 1
-    for i in range(len(q1_original)):
-        print("%d : %s --- %s "%(count_original,q1_original[i],q2_original[i]))
-        if q1_original[i] == q2_original[i]:
+        else:
+            print("%d : %s --- %s " % (count, q1_result[i], q2_result[i]))
+    for i in range(len(q1_result)):
+        if q1_result[i] == q2_original[i]:
             count_original += 1
+        else:
+            print("%d : %s --- %s " % (count_original, q1_result[i], q2_original[i]))
 
     print("the result is : %.10f"%(count/(len(q1_result)+ 0.1)))
     print("the result_original  is : %.10f" % (count_original / (len(q1_result) + 0.1)))
