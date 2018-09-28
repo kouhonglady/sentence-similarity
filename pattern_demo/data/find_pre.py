@@ -117,37 +117,97 @@
 # 输出范例:
 # 请播放 周杰伦/actor,singer 的 七里香/song 给我听
 
-import sys
-def fine_end(word_dict, line, i):
-    for j in range(i,len(line))[::-1]:
-        if word_dict.get(line[i:j], [])!=[]:
-            return j
-    return -1
+# import sys
+# def fine_end(word_dict, line, i):
+#     for j in range(i,len(line))[::-1]:
+#         if word_dict.get(line[i:j], [])!=[]:
+#             return j
+#     return -1
+#
+# if __name__ == '__main__':
+#     # n = raw_input().strip().split(';')
+#     n = 'singer_周杰|周杰伦|刘德华|王力宏;song_冰雨|北京欢迎你|七里香|你是风儿我是沙;actor_周杰伦|孙俪'.split(';')
+#     word_dict = {}
+#     put = ''
+#     for i in n:
+#         key = i.split('_')[0]
+#         for j in i.split('_')[1].split('|'):
+#             if word_dict.get(j, []) == []:
+#                 word_dict[j] = [key]
+#             else:
+#                 word_dict[j].append(key)
+#     #line = raw_input().strip()
+#     line = '请播放周杰伦七里香和周杰的你是风儿我是沙给我听'
+#     i = 0
+#     print(word_dict)
+#     while i < len(line):
+#         e = fine_end(word_dict, line, i)
+#         if e!=-1:
+#             put += ' ' + line[i:e] + '/' +','.join(sorted(word_dict[line[i:e]])) + ' '#败在这个sorted上了，泪
+#             i = e
+#         else:
+#             put += line[i]
+#             i += 1
+#     put = put.split()
+#     put = ' '.join(put)
+#     sys.stdout.write(put)
+
+
+import pandas as pd
+
+def main():
+    dataset = pd.read_excel('E:/study/hrg_project/environment/dataset/test.xls',header = None)
+    length = len(dataset)
+    q1_result = []
+    q2_result = []
+    q2_original = []
+    q2_total = []
+
+    total = 0
+
+
+    for i in range(length):
+        sten1 = dataset.ix[i][2].strip('_').split("_")
+        # print(sten1)
+        q1_result.append(sten1[0])
+
+
+    for i in range(length):
+        sten1 = dataset.ix[i][3].strip('_').split("_")
+        if q1_result[i] in sten1:
+            q2_total.append(1)
+            print(q1_result[i])
+            total += 1
+        else:
+            q2_total.append(0)
+        q2_original.append(sten1[0])
+
+    count = 0
+    count_original = 0
+    print(len(q1_result))
+    print(len(q2_result))
+    for i in range(len(q2_result)):
+        if q1_result[i] == q2_result[i]:
+            count += 1
+        # else:
+        #     #print("%d : %s --- %s " % (count, q1_result[i], q2_result[i]))
+    for i in range(len(q1_result)):
+        if q1_result[i] == q2_original[i]:
+            count_original += 1
+        # else:
+        #     # print("%d : %s --- %s " % (count_original, q1_result[i], q2_original[i]))
+
+    total_count = 0
+    for i in range(len(q2_total)):
+        if q2_total == 1:
+            total_count += 1
+
+
+    print("the result is : %.10f"%(count/(len(q1_result)+ 0.1)))
+    print("the result_original  is : %.10f" % (count_original / (len(q1_result) + 0.1)))
+    print("the totoals is: %d ,and the rate is  :%.10f "%(total,total/len(q2_total)))
 
 if __name__ == '__main__':
-    # n = raw_input().strip().split(';')
-    n = 'singer_周杰|周杰伦|刘德华|王力宏;song_冰雨|北京欢迎你|七里香|你是风儿我是沙;actor_周杰伦|孙俪'.split(';')
-    word_dict = {}
-    put = ''
-    for i in n:
-        key = i.split('_')[0]
-        for j in i.split('_')[1].split('|'):
-            if word_dict.get(j, []) == []:
-                word_dict[j] = [key]
-            else:
-                word_dict[j].append(key)
-    #line = raw_input().strip()
-    line = '请播放周杰伦七里香和周杰的你是风儿我是沙给我听'
-    i = 0
-    print(word_dict)
-    while i < len(line):
-        e = fine_end(word_dict, line, i)
-        if e!=-1:
-            put += ' ' + line[i:e] + '/' +','.join(sorted(word_dict[line[i:e]])) + ' '#败在这个sorted上了，泪
-            i = e
-        else:
-            put += line[i]
-            i += 1
-    put = put.split()
-    put = ' '.join(put)
-    sys.stdout.write(put)
+     main()
+
+

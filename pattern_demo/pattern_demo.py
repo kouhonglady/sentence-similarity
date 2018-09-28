@@ -25,11 +25,11 @@ final_pattern = root_path + r'/dataset/final_pattern.txt'
 pairs_features = root_path + r'/dataset/pairs_features.txt'
 result_path = root_path + r'/result.txt'
 model_path = root_path + r'/model_weizhong.txt'
-# M = 100000
+M = 1000
 
 dataset = pd.read_csv(data_path)
-# data = dataset[0:M]
-data = dataset
+data = dataset[0:M]
+#data = dataset
 Length, Width = data.shape
 
 
@@ -240,7 +240,7 @@ def step4_lr():
 
     data = csr_matrix((features_data, (row_ind,col_ind)),shape=(Length,sizes_of_features))
     data_y = pd.read_csv(data_path).pop('res')
-    # data_y = data_y[0:M]
+    data_y = data_y[0:M]
 
     print(data.shape)
 
@@ -251,7 +251,7 @@ def step4_lr():
 
 
     for step in range(10):
-        cls = LogisticRegression(solver='lbfgs')
+        cls = LogisticRegression()
 
         x_train, x_test, y_train, y_test = train_test_split(data, data_y, test_size = 0.3)
         # 选择模型
@@ -274,10 +274,10 @@ def step4_lr():
         #
         # f.write( "step :%d  F1_score: %.10f" %(step,f1_score(y_test, LogisticRegression_y_pred)))
         #
-        # clf = SVC(gamma='auto')
-        # clf.fit(x_train, y_train)
-        # svm_y_pred = clf.predict(x_test)
-        # print("svm_y_pred step :%d  F1_score: %.10f" % (step, f1_score(y_test, svm_y_pred)))
+        clf = SVC(gamma='auto')
+        clf.fit(x_train, y_train)
+        svm_y_pred = clf.predict(x_test)
+        print("svm_y_pred step :%d  F1_score: %.10f" % (step, f1_score(y_test, svm_y_pred)))
 
     s = pickle.dumps(cls)
     f = open(model_path, 'wb')

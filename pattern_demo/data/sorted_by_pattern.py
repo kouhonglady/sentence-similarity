@@ -50,7 +50,7 @@ def step3_text_filtering(feature,patterns):
     line_length = 0
     with open(pairs_features,"r") as f:
         line_length = int(f.readline())
-    print(line_length)
+    # print(line_length)
     features_data = []
     row_ind = []
     col_ind = []
@@ -76,14 +76,21 @@ def main():
     q1_result = []
     q2_result = []
     q2_original = []
+    q2_total = []
 
 
     for i in range(length):
         sten1 = dataset.ix[i][2].strip('_').split("_")
         q1_result.append(sten1[0])
 
+
     for i in range(length):
         sten1 = dataset.ix[i][3].strip('_').split("_")
+        if q1_result[i] in sten1:
+            q2_total.append(1)
+            print(q1_result[i])
+        else:
+            q2_total.append(0)
         q2_original.append(sten1[0])
         sten2 = []
         for j in range(len(sten1)):
@@ -100,25 +107,32 @@ def main():
                 break;
         if k == leng-1 and len(q2_result) < i:
                 q2_result.append(sten1[0])
-        print("the %d  %d q1 sentence " % (i, len(q2_result)))
+        # print("the %d  %d q1 sentence " % (i, len(q2_result)))
 
     count = 0
     count_original = 0
     print(len(q1_result))
     print(len(q2_result))
-    for i in range(len(q1_result)):
+    for i in range(len(q2_result)):
         if q1_result[i] == q2_result[i]:
             count += 1
-        else:
-            print("%d : %s --- %s " % (count, q1_result[i], q2_result[i]))
+        # else:
+        #     #print("%d : %s --- %s " % (count, q1_result[i], q2_result[i]))
     for i in range(len(q1_result)):
         if q1_result[i] == q2_original[i]:
             count_original += 1
-        else:
-            print("%d : %s --- %s " % (count_original, q1_result[i], q2_original[i]))
+        # else:
+        #     # print("%d : %s --- %s " % (count_original, q1_result[i], q2_original[i]))
+
+    total_count = 0
+    for i in range(len(q2_total)):
+        if q2_total is 1:
+            total_count += 1
+
 
     print("the result is : %.10f"%(count/(len(q1_result)+ 0.1)))
     print("the result_original  is : %.10f" % (count_original / (len(q1_result) + 0.1)))
+    print("the totoals is: %d ,and the rate is  :%.10f "%(total_count,total_count/len(q2_total)))
 
 if __name__ == '__main__':
      main()
