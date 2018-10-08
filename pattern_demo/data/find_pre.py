@@ -156,7 +156,7 @@
 import pandas as pd
 
 def main():
-    dataset = pd.read_excel('E:/study/hrg_project/environment/dataset/test.xls',header = None)
+    dataset = pd.read_excel('E:/study/hrg_project/environment/dataset/test_new.xls',header = None)
     length = len(dataset)
     q1_result = []
     q2_result = []
@@ -167,19 +167,21 @@ def main():
 
 
     for i in range(length):
-        sten1 = dataset.ix[i][2].strip('_').split("_")
+        sten1 = str(dataset.ix[i][2]).strip('_').split("_")
         # print(sten1)
         q1_result.append(sten1[0])
 
 
     for i in range(length):
+        print(i)
         sten1 = dataset.ix[i][3].strip('_').split("_")
         if q1_result[i] in sten1:
             q2_total.append(1)
-            print(q1_result[i])
+
             total += 1
         else:
             q2_total.append(0)
+            print(("%d:" + dataset.ix[i][1]) % i)
         q2_original.append(sten1[0])
 
     count = 0

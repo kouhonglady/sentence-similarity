@@ -4,14 +4,8 @@ import os
 import shutil
 import pickle
 import pandas as pd
-from sklearn.externals import joblib
+import numpy as np
 
-"""
-   rm the characters like ,/; except chinese and numbers . cut the sentences to words,and pair the to pattern
-                each lines of file is contains two sentences,and a tag 0(means two sentences have different  meaning) or 1( same meaning). 
-    setence_word_q1/setence_word_q2: use the Chinese Word Segmentation API jieba to cut the q1/q2 sentences to words,and save it in file  {setence_word_q1/setence_word_q2} 
-    word_to_pattern : pair one word of q1 and one word of q2 to pattern,and save all the pattern in file{word_to_pattern}
-"""
 
 root_path = r'E:\study\hrg_project\environment\dataset\precision_data'
 
@@ -25,22 +19,28 @@ final_pattern = root_path + r'/dataset/final_pattern.txt'
 pairs_features = root_path + r'/dataset/pairs_features.txt'
 result_path = root_path + r'/result.txt'
 model_path = root_path + r'/model_weizhong.txt'
-M = 1000
+
 
 dataset = pd.read_csv(data_path)
-data = dataset[0:M]
-#data = dataset
+data = dataset
+data_y_all = data['res']
+
+# M = 10000
+# data = dataset[0:M]
+# data_y_all = data_y_all[0:M]
+data_y = data_y_all
+line_count_list = []
+
+
 Length, Width = data.shape
 
 
-def step1_cutword_to_pattern():
+def step1_cut_sentence_to_words():
     print("step1_cutword_to_pattern :start")
-
     #非中文和数字字符 \u0030-\u0039 数字0-9  \u4e00-\u9fa5 所有中文字符
     pattern = re.compile(r'[^\u4e00-\u9fa5]')
 
     #将所有的q1，去除非中文字符，并且进行结巴分词，之后一行一个句子的方式保存
-
     print("start cutting setence one")
     with open(sentence_word_q1, "w",encoding='utf-8') as f:
         i = 0;
@@ -106,29 +106,29 @@ def rm_stopwords(file_path, word_dict):
 
 
 
-def step2_cut_top_word():
+def step2_word_top_pattern():
     print ("step2_cut_top_word: now combine two words ,one from setence one and another from setence two. and save in %s." %word_to_pattern)
     #q1,q2 分词之后，分别两两组合，形成pattern
+
     with open(sentence_word_q1,"r",encoding ='utf-8')as f1,open(sentence_word_q2,'r',encoding = 'utf-8') as f2,open(word_to_pattern,'w',encoding='utf-8') as f3:
         line1 = f1.readline()
         line2 = f2.readline()
-
         while line1 and line2:
             temp=""
             for t in line1.split():
                 for k in line2.split():
                     temp = temp+" "+t+"###"+k
-            if temp is "":
-                temp = "#:1"
-            f3.write(temp+'\n')
-            # print(temp)
+            if temp is not "":
+                f3.write(temp + '\n')
             line1 = f1.readline()
             line2 = f2.readline()
         f1.close()
         f2.close()
         f3.close()
+
     # rm_stopwords(word_to_pattern, word_dict)
     print("step end. combine  words to pattern has  finished")
+
 
 
 def step3_text_filtering():
@@ -139,7 +139,7 @@ def step3_text_filtering():
         line = f.readline()
         while line:
             temp = line.split()
-            #	          print(temp)
+            print(temp)
             for t in temp:
                 if t in pattern.keys():
                     pattern[t] += 1
@@ -147,15 +147,7 @@ def step3_text_filtering():
                     pattern[t]=1
             line = f.readline()
         f.close()
-    def cmp(a,b):
-        if a > b:
-            return 1
-        elif a < b:
-            return -1
-        else :
-            return 0
 
-    #patterns = sorted(pattern, lambda x, y: cmp(x[1], y[1]))#将pattern按照出现的次数降序排序
     patterns = pattern
     # pos = 1
     # for k in patterns.keys():
@@ -164,7 +156,9 @@ def step3_text_filtering():
     pos = 0
     print(len(patterns))
     for k, v in list(patterns.items()):
-        if patterns[k] <= 1: patterns.pop(k)
+        if patterns[k] <= 1:
+            print(k,v)
+            patterns.pop(k)
         else:
             patterns[k] = pos
             pos += 1
@@ -180,6 +174,9 @@ def step3_text_filtering():
     with open(word_to_pattern,"r",encoding ='utf-8')as f1,open(pairs_features,'w',encoding='utf-8') as f3:
         line1 = f1.readline().strip().split()
         f3.write(str(pos) + "\n" )
+
+        line_count = 0
+
         while line1:
             # print(line1)
             # print(line2)
@@ -187,9 +184,11 @@ def step3_text_filtering():
             for t in line1:
                 if t in patterns.keys():
                     s +=" "+str(patterns[t])+":"+str(1)
-            if s  is "":
-                s = "0:1"
-            f3.write(s+"\n" )
+            if s  is not "":
+                f3.write(s+"\n" )
+            else:
+                line_count_list.append(line_count)
+            line_count += 1
             # print(s)
             # print(inf)
             #	          print(line1)
@@ -198,6 +197,8 @@ def step3_text_filtering():
             line1 = f1.readline().strip().split()
         f1.close()
         f3.close()
+        print(line_count_list)
+        print(data_y.shape)
     print("step3 end")
 
 
@@ -238,20 +239,24 @@ def step4_lr():
     # print("len(col_ind):"+str(len(col_ind)))
     f.close()
 
-    data = csr_matrix((features_data, (row_ind,col_ind)),shape=(Length,sizes_of_features))
-    data_y = pd.read_csv(data_path).pop('res')
-    data_y = data_y[0:M]
+    data_y = data_y_all.drop(line_count_list)
+    # data = csr_matrix((features_data, (row_ind,col_ind)),shape=(Length,sizes_of_features))
+    data = csr_matrix((features_data, (row_ind, col_ind)), shape=(data_y.shape[0], sizes_of_features))
 
-    print(data.shape)
 
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import f1_score
     from sklearn.linear_model import LogisticRegression
     from sklearn.svm import SVC
+    from sklearn import preprocessing
 
+    data = preprocessing.maxabs_scale(data)
+
+    # print(data.shape)
 
     for step in range(10):
         cls = LogisticRegression()
+
 
         x_train, x_test, y_train, y_test = train_test_split(data, data_y, test_size = 0.3)
         # 选择模型
@@ -287,8 +292,8 @@ def step4_lr():
 
 
 if __name__ == '__main__':
-    step1_cutword_to_pattern()
-    step2_cut_top_word()
+    step1_cut_sentence_to_words()
+    step2_word_top_pattern()
     step3_text_filtering()
     step4_lr()
 
