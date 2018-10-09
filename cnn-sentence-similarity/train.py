@@ -5,8 +5,8 @@ import numpy as np
 import os
 import time
 import datetime
-import data_helpers
-from text_cnn import TextCNN
+from . import data_helpers
+from . import text_cnn
 from tensorflow.contrib import learn
 
 
@@ -134,7 +134,7 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
         sess = tf.Session(config=session_conf)
         with sess.as_default():
             print(y_train.shape)
-            cnn = TextCNN(
+            cnn = text_cnn.TextCNN(
                 sequence_length=x_train.shape[1],
                 num_classes=y_train.shape[1],
                 vocab_size=len(vocab_processor.vocabulary_),

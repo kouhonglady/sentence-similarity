@@ -20,15 +20,19 @@ pairs_features = root_path + r'/dataset/pairs_features.txt'
 result_path = root_path + r'/result.txt'
 model_path = root_path + r'/model_weizhong.txt'
 
+features_data_path = root_path + r'\dataset\temp_data\features_data.csv'
+row_ind_path = root_path + r'\dataset\temp_data\row_ind.csv'
+col_ind_path = root_path + r'\dataset\temp_data\col_ind.csv'
+data_y_path = root_path + r'\dataset\temp_data\data_y.csv'
+
 
 dataset = pd.read_csv(data_path)
 data = dataset
 data_y_all = data['res']
 
-# M = 10000
+# M = 1000
 # data = dataset[0:M]
 # data_y_all = data_y_all[0:M]
-data_y = data_y_all
 line_count_list = []
 
 
@@ -51,7 +55,6 @@ def step1_cut_sentence_to_words():
             f.write(" ".join(temp) + "\n")
             i += 1
         f.close()
-    print("cutting setences one has finished")
 
     #将所有的q2，去除非中文字符，并且进行结巴分词，之后一行一个句子的方式保存
     print("start cutting setence two")
@@ -64,7 +67,6 @@ def step1_cut_sentence_to_words():
             f.write(" ".join(temp)+ "\n")
             i += 1
         f.close()
-    print("cutting setences two has finished")
     print("step1 end")
 
 def rm_stopwords(file_path, word_dict):
@@ -107,9 +109,9 @@ def rm_stopwords(file_path, word_dict):
 
 
 def step2_word_top_pattern():
-    print ("step2_cut_top_word: now combine two words ,one from setence one and another from setence two. and save in %s." %word_to_pattern)
+    print ("step2_word_top_pattern: start.")
     #q1,q2 分词之后，分别两两组合，形成pattern
-
+    line_count = 0
     with open(sentence_word_q1,"r",encoding ='utf-8')as f1,open(sentence_word_q2,'r',encoding = 'utf-8') as f2,open(word_to_pattern,'w',encoding='utf-8') as f3:
         line1 = f1.readline()
         line2 = f2.readline()
@@ -120,18 +122,20 @@ def step2_word_top_pattern():
                     temp = temp+" "+t+"###"+k
             if temp is not "":
                 f3.write(temp + '\n')
+            else :
+                line_count_list.append(line_count)
+            line_count += 1
             line1 = f1.readline()
             line2 = f2.readline()
         f1.close()
         f2.close()
         f3.close()
-
     # rm_stopwords(word_to_pattern, word_dict)
-    print("step end. combine  words to pattern has  finished")
+    print("step2 end.")
 
 
 
-def step3_text_filtering():
+def step3_pattern_filtering():
     print("step3_text_filtering: start to change sentences pairs to features")
     pattern = {}
 
@@ -139,7 +143,6 @@ def step3_text_filtering():
         line = f.readline()
         while line:
             temp = line.split()
-            print(temp)
             for t in temp:
                 if t in pattern.keys():
                     pattern[t] += 1
@@ -163,23 +166,15 @@ def step3_text_filtering():
             patterns[k] = pos
             pos += 1
 
-    print(pos)
-    print(len(patterns))
-
     with open(final_pattern,'wb') as f:
         pickle.dump(pattern, f)
         f.close()
 
-
     with open(word_to_pattern,"r",encoding ='utf-8')as f1,open(pairs_features,'w',encoding='utf-8') as f3:
         line1 = f1.readline().strip().split()
         f3.write(str(pos) + "\n" )
-
         line_count = 0
-
         while line1:
-            # print(line1)
-            # print(line2)
             s = ""
             for t in line1:
                 if t in patterns.keys():
@@ -189,60 +184,68 @@ def step3_text_filtering():
             else:
                 line_count_list.append(line_count)
             line_count += 1
-            # print(s)
-            # print(inf)
-            #	          print(line1)
-            #	          print(line2)
-            #	          print(s+"\n")
             line1 = f1.readline().strip().split()
         f1.close()
         f3.close()
         print(line_count_list)
-        print(data_y.shape)
+        data_y = data_y_all.drop(line_count_list)
+        np.savetxt(data_y_path, data_y,delimiter=",")
     print("step3 end")
 
 
-from scipy.sparse import csr_matrix
 
-# csr_matrix
-# (data, (row_ind, col_ind)
-
-def step4_lr():
-    print("step4_lr: start to change sentences pairs to features")
-    # data = pd.DataFrame()
+def step4_patter_to_feature():
+    print("step4_patter_to_feature : start")
     features_data = []
     row_ind = []
     col_ind = []
 
-    with open(pairs_features,'r') as f:
+    with open(pairs_features, 'r') as f:
         sizes_of_features = int(f.readline())
         print(sizes_of_features)
         line = f.readline().strip()
-        # print(line)
         line_count = 0
         while line:
-            # temp = pd.Series([0]* length)
+            print(line_count)
             for k in line.split():
-                #temp[int(k.split(':')[0])] =1
                 temp = int(k.split(':')[0])
                 if temp not in col_ind:
                     row_ind.append(line_count)
                     col_ind.append(temp)
                     features_data.append(1)
             line_count += 1
-            print(line_count)
             line = f.readline().strip()
-            # print(row_ind)
-            # print(col_ind)
-            # print(features_data)
-        # print("line_count:"+ str(line_count))
-    # print("len(col_ind):"+str(len(col_ind)))
     f.close()
 
-    data_y = data_y_all.drop(line_count_list)
-    # data = csr_matrix((features_data, (row_ind,col_ind)),shape=(Length,sizes_of_features))
-    data = csr_matrix((features_data, (row_ind, col_ind)), shape=(data_y.shape[0], sizes_of_features))
+    np.savetxt(features_data_path,features_data,delimiter=",")
+    np.savetxt(row_ind_path, row_ind,delimiter=",")
+    np.savetxt(col_ind_path, col_ind,delimiter=",")
+    print("step4 end")
 
+from scipy.sparse import csr_matrix
+
+# csr_matrix
+# (data, (row_ind, col_ind)
+
+def step5_lr():
+    # import pprint, pickle
+    #
+    # pkl_file = open(final_pattern, 'rb')
+    #
+    # data1 = pickle.load(pkl_file)
+    # pprint.pprint(data1)
+    # pkl_file.close()
+
+    print("step5_lr: start")
+    with open(pairs_features, 'r') as f:
+        sizes_of_features = int(f.readline())
+
+    data_y = np.loadtxt(data_y_path, delimiter=",")
+    features_data = np.loadtxt(features_data_path,delimiter=",")
+    row_ind = np.loadtxt(row_ind_path,delimiter=",")
+    col_ind = np.loadtxt(col_ind_path,delimiter=",")
+
+    data = csr_matrix((features_data, (row_ind, col_ind)), shape=(data_y.shape[0], sizes_of_features))
 
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import f1_score
@@ -250,15 +253,15 @@ def step4_lr():
     from sklearn.svm import SVC
     from sklearn import preprocessing
 
-    data = preprocessing.maxabs_scale(data)
+    temp_data = preprocessing.maxabs_scale(data)
 
     # print(data.shape)
 
-    for step in range(10):
-        cls = LogisticRegression()
+    for step in range(1):
+        cls = LogisticRegression(penalty= 'l2',class_weight={0:0.50,1:0.50},solver='liblinear',random_state=1763)
 
 
-        x_train, x_test, y_train, y_test = train_test_split(data, data_y, test_size = 0.3)
+        x_train, x_test, y_train, y_test = train_test_split(temp_data, data_y, test_size = 0.3, random_state=1729)
         # 选择模型
         # 把数据交给模型训练
 
@@ -274,15 +277,18 @@ def step4_lr():
         # print(y_test[0:20])
         # print(y_test)
         print(LogisticRegression_y_pred)
+        np.savetxt(root_path + r"/LogisticRegression_y_pred.csv", LogisticRegression_y_pred, delimiter=",")
         print("LogisticRegression_y_pred step :%d  F1_score: %.10f" %(step ,f1_score(y_test, LogisticRegression_y_pred)))
+
         # f = open(result_path,'w+',encoding = 'utf-8')
         #
         # f.write( "step :%d  F1_score: %.10f" %(step,f1_score(y_test, LogisticRegression_y_pred)))
         #
-        clf = SVC(gamma='auto')
-        clf.fit(x_train, y_train)
-        svm_y_pred = clf.predict(x_test)
-        print("svm_y_pred step :%d  F1_score: %.10f" % (step, f1_score(y_test, svm_y_pred)))
+        # clf = SVC(gamma='auto')
+        # clf.fit(x_train, y_train)
+        # svm_y_pred = clf.predict(x_test)
+        # print("svm_y_pred step :%d  F1_score: %.10f" % (step, f1_score(y_test, svm_y_pred)))
+
 
     s = pickle.dumps(cls)
     f = open(model_path, 'wb')
@@ -292,8 +298,9 @@ def step4_lr():
 
 
 if __name__ == '__main__':
-    step1_cut_sentence_to_words()
-    step2_word_top_pattern()
-    step3_text_filtering()
-    step4_lr()
+    # step1_cut_sentence_to_words()
+    # step2_word_top_pattern()
+    # step3_pattern_filtering()
+    # step4_patter_to_feature()
+    step5_lr()
 

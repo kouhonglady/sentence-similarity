@@ -68,7 +68,7 @@ def step3_text_filtering(feature,patterns):
 from scipy.sparse import csr_matrix
 
 def main():
-    dataset = pd.read_excel('E:/study/hrg_project/environment/dataset/test.xls',header = None)
+    dataset = pd.read_excel(r'E:\study\hrg_project\environment\dataset\precision_data\test_new.xls',header = None)
     cls = joblib.load(model_path)
     patterns = joblib.load(final_pattern)
 
@@ -77,20 +77,24 @@ def main():
     q2_result = []
     q2_original = []
     q2_total = []
+    q1_answer = []
+    q2_answer = []
+
+
+    for i in range(length):
+        q1_result.append(dataset.ix[i][0])
+        sten2 = dataset.ix[i][3].strip('_').split("_")
+        q1_answer.append(sten2[0])
 
 
     for i in range(length):
         sten1 = dataset.ix[i][2].strip('_').split("_")
-        q1_result.append(sten1[0])
-
-
-    for i in range(length):
-        sten1 = dataset.ix[i][3].strip('_').split("_")
-        if q1_result[i] in sten1:
+        sten_ans =  dataset.ix[i][4].strip('_').split("_")
+        if q1_answer[i] in sten_ans:
             q2_total.append(1)
-            print(q1_result[i])
         else:
             q2_total.append(0)
+            print(q1_answer[i])
         q2_original.append(sten1[0])
         sten2 = []
         for j in range(len(sten1)):
@@ -126,7 +130,7 @@ def main():
 
     total_count = 0
     for i in range(len(q2_total)):
-        if q2_total is 1:
+        if q2_total[i] is 1:
             total_count += 1
 
 
