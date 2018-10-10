@@ -5,8 +5,8 @@ import numpy as np
 import os
 import time
 import datetime
-from . import data_helpers
-from . import text_cnn
+import data_helpers
+import text_cnn
 from tensorflow.contrib import learn
 
 
@@ -22,6 +22,8 @@ tf.flags.DEFINE_string("train_data_s1_path", "./data/processed/train_data_s1_pat
 tf.flags.DEFINE_string("train_data_s2_path", "./data/processed/train_data_s2_path.txt", "S2_to_words of train data.")
 tf.flags.DEFINE_string("word2vec_output_model", "./data/processed/word2vec_output_model.model", "Word2vec_output_model.")
 tf.flags.DEFINE_string("word2vec_output_vec", "./data/processed/word2vec_output_vec.vector", "Word2vec_output_vec.")
+tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
+
 
 
 
@@ -95,6 +97,10 @@ def preprocess():
     x_s1 = np.array(list(vocab_processor.fit_transform(x_text_s1)))
     x_s2 = np.array(list(vocab_processor.fit_transform(x_text_s2)))
     x = np.concatenate((x_s1, x_s2), axis=1)
+
+    # 保存和加载词汇表
+    vocab_processor.save(FLAGS.vocab_processor)  # 保存
+    # vocab = vocab_processor.restore('vocab.pickle')  # 加载
 
     # Randomly shuffle data
     # 函数shuffle与permutation都是对原来的数组进行重新洗牌（即随机打乱原来的元素顺序）；
