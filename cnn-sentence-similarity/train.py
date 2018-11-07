@@ -16,13 +16,14 @@ from tensorflow.contrib import learn
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("train_data_path", "./data/original/train_data.csv", "Data source for the train data.")
+tf.flags.DEFINE_string("train_data_path", "./data/original/test_new_train.xlsx", "Data source for the train data.")
 tf.flags.DEFINE_string("test_data_path", "./data/original/test_data.csv", "Data source for the test data.")
 tf.flags.DEFINE_string("train_data_s1_path", "./data/processed/train_data_s1_path.txt", "S1_to_words of train data.")
 tf.flags.DEFINE_string("train_data_s2_path", "./data/processed/train_data_s2_path.txt", "S2_to_words of train data.")
 tf.flags.DEFINE_string("word2vec_output_model", "./data/processed/word2vec_output_model.model", "Word2vec_output_model.")
 tf.flags.DEFINE_string("word2vec_output_vec", "./data/processed/word2vec_output_vec.vector", "Word2vec_output_vec.")
-tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
+# tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
+tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.txt", "vocab_processor.")
 
 
 
@@ -38,7 +39,7 @@ tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 200, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
+tf.flags.DEFINE_integer("checkpoint_every", 10, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
@@ -59,7 +60,7 @@ def preprocess():
 
     # Cut Words
     print("Cutting words...")
-    # data_helpers.sentence_to_word(FLAGS.train_data_path,FLAGS.train_data_s1_path,FLAGS.train_data_s2_path)
+    data_helpers.sentence_to_word(FLAGS.train_data_path,FLAGS.train_data_s1_path,FLAGS.train_data_s2_path)
 
     # Load data
     print("Loading data...")
@@ -100,6 +101,8 @@ def preprocess():
 
     # 保存和加载词汇表
     vocab_processor.save(FLAGS.vocab_processor)  # 保存
+
+
     # vocab = vocab_processor.restore('vocab.pickle')  # 加载
 
     # Randomly shuffle data
@@ -190,9 +193,13 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
             # Checkpoint directory. Tensorflow assumes this directory already exists so we need to create it
             checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
             checkpoint_prefix = os.path.join(checkpoint_dir, "model")
+
+
             if not os.path.exists(checkpoint_dir):
                 os.makedirs(checkpoint_dir)
             saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)
+            # 保存二进制模型
+
 
             # Write vocabulary
             vocab_processor.save(os.path.join(out_dir, "vocab"))
@@ -248,6 +255,16 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
                 if current_step % FLAGS.checkpoint_every == 0:
                     path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                     print("Saved model checkpoint to {}\n".format(path))
+                if current_step %FLAGS.checkpoint_every   == 0:
+                    output_graph_def = tf.graph_util.convert_variables_to_constants(sess, sess.graph_def,
+                                                                                    output_node_names=['output/scores'])
+                    pb_file = checkpoint_dir + '/cnn-sentence-similarity'+'.pb'
+                    if os.path.isfile(pb_file):
+                        os.remove(pb_file)  # 删除文件
+                    with tf.gfile.FastGFile(pb_file, mode='wb') as f:
+                        f.write(output_graph_def.SerializeToString())
+                        print("Saved model  to {}\n".format(pb_file))
+
 
 def main(argv=None):
     x_train, y_train, vocab_processor, x_dev, y_dev = preprocess()
