@@ -8,13 +8,13 @@ import numpy as np
 
 
 # root_path 路径
-root_path = r'E:\study\hrg_project\environment\dataset\precision_data'
+root_path = r'E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\pattern_demo\data\data20181115_old'
 
 # original 数据
 # data_path:训练数据的路径、训练数据的格式为(q1,q2,res).
 #           q1:句子一、q2:句子二、res:若句子一与句子二表示相同语义为1，不同语义为0
 # word_dict :停用词文件路径、停用词格式为一行一个停用词，包括一些符号以及一些搭配
-data_path = root_path + r'/original/train_weizhong.csv'
+data_path = root_path + r'/original/test_new_train.xlsx'
 word_dict = root_path + r'/original/Chinese_stopwords.txt'
 
 # dataset 数据
@@ -55,7 +55,7 @@ data_y_path = root_path + r'\dataset\temp_data\data_y.csv'
 # 所以在两个词中间加入间隔符 the_interval_in_pattern ，上述两个模式分别是 “微信###息”“微###信息”表示不同的模式
 the_interval_in_pattern = "###"
 
-dataset = pd.read_csv(data_path)
+dataset = pd.read_excel(data_path)
 data = dataset
 data_y_all = data['res']
 
@@ -315,12 +315,7 @@ def step5_lr():
         LogisticRegression_y_pred = cls.predict(x_test)
 
 
-        # dataset_dense = x_train.todense()
-        # print(dataset_dense[1][0:50])
-        # print(y_train[0:20])
-        # dataset_dense_test = x_test.todense()
-        # print(dataset_dense_test[1][0:50])
-        # print(y_test[0:20])
+
         print(y_test)
         print(LogisticRegression_y_pred)
         np.savetxt(root_path + r"/LogisticRegression_y_pred.csv", LogisticRegression_y_pred, delimiter=",")
@@ -345,9 +340,9 @@ def step5_lr():
 
 if __name__ == '__main__':
 
-    # step1_cut_sentence_to_words()
-    # step2_word_top_pattern()
-    # step3_pattern_filtering()
+    step1_cut_sentence_to_words()
+    step2_word_top_pattern()
+    step3_pattern_filtering()
     step4_patter_to_feature()
     step5_lr()
 

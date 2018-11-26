@@ -116,13 +116,13 @@ def spady():
 
 
 def removedup():
-    data = pd.read_excel(r"data_train.xlsx")
+    data = pd.read_excel(r"test_new_train_1108.xls")
     print(data.shape)
-    data.drop_duplicates(keep = False,inplace= True)
+    data.drop_duplicates(keep = 'first',inplace= True)
     print(data.shape)
-    if os.path.isfile(r"data_train.xlsx"):
-        os.remove(r"data_train.xlsx")  # 删除文件
-    data.to_excel("data_train.xlsx",index=False, header=True)
+    if os.path.isfile(r"test_new_train_1108.xls"):
+        os.remove(r"test_new_train_1108.xls")  # 删除文件
+    data.to_excel("test_new_train_1108.xls",index=False, header=True)
 
 
 def find_similary_question_on_baidu():
@@ -160,7 +160,7 @@ def find_similary_question_on_baidu():
             count += 1
             if count == 4:
                 break
-        if i %200 == 0:
+        if i %50 == 0:
             if os.path.isfile(r"test_new_pred_to_find_similarity_result.xlsx"):
                 os.remove(r"test_new_pred_to_find_similarity_result.xlsx")  # 删除文件
             result_data = pd.DataFrame(q1_q2_pairs)

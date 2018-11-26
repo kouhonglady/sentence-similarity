@@ -20,9 +20,7 @@ class TextCNN(object):
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
             # W 形状是[vocab_size, embedding_size] 初始值是从-1到1，均匀分布随机取值
-            self.W = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
-                name="W")
+            self.W = tf.Variable(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),name="W")
             # tf.nn.embedding_lookup函数的用法主要是选取一个张量里面索引对应的元素。
             # tf.nn.embedding_lookup（tensor, id）:tensor就是输入张量，id就是张量对应的索引
             self.embedded_chars = tf.nn.embedding_lookup(self.W, self.input_x)

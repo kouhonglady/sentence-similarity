@@ -8,9 +8,9 @@ from sklearn.externals import joblib
 import pickle
 
 
-tf.flags.DEFINE_string("test_new",r'E:\study\hrg_project\environment\dataset\precision_data\test_new1028.xls',"the path of the test file")
-tf.flags.DEFINE_string("meta_graph_path", r'E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\cnn-sentence-similarity\runs\1540341434\checkpoints\model-16810.meta', "the path of the model witch has been trained")
-tf.flags.DEFINE_string("latest_checkpoint", r"E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\cnn-sentence-similarity\runs\1540341434\checkpoints", "the path of the checkpoints files")
+tf.flags.DEFINE_string("test_new",r'E:\study\hrg_project\environment\dataset\precision_data\test_new1107.xls',"the path of the test file")
+tf.flags.DEFINE_string("meta_graph_path", r'E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\cnn-sentence-similarity\runs\1541636111\checkpoints\model-17020.meta', "the path of the model witch has been trained")
+tf.flags.DEFINE_string("latest_checkpoint", r"E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\cnn-sentence-similarity\runs\1541636111\checkpoints", "the path of the checkpoints files")
 tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
 FLAGS = tf.flags.FLAGS
 
@@ -189,11 +189,12 @@ def save_train_data():
     print(len(res))
     data = {'q2': q2, 'q2_ans_best': q2_ans_best,"res":res}
     dataframe = pd.DataFrame(data)
-    dataframe.to_csv("data_train.csv")
+    dataframe.to_csv("data_train_net.csv")
 
 
 def find_base_line():
-    dataset = pd.read_excel(FLAGS.test_new)
+    # dataset = pd.read_excel(FLAGS.test_new)
+    dataset = pd.read_excel(r"E:\study\hrg_project\backup\hrg_project20181024\test_new_pred.xlsx")
     length = len(dataset)
     q1_ans_top = []
     q2_ans_top = []

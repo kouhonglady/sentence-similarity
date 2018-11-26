@@ -16,14 +16,14 @@ from tensorflow.contrib import learn
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("train_data_path", "./data/original/test_new_train.xlsx", "Data source for the train data.")
+tf.flags.DEFINE_string("train_data_path", "./data/original/test_new_train_1108.xls", "Data source for the train data.")
 tf.flags.DEFINE_string("test_data_path", "./data/original/test_data.csv", "Data source for the test data.")
 tf.flags.DEFINE_string("train_data_s1_path", "./data/processed/train_data_s1_path.txt", "S1_to_words of train data.")
 tf.flags.DEFINE_string("train_data_s2_path", "./data/processed/train_data_s2_path.txt", "S2_to_words of train data.")
 tf.flags.DEFINE_string("word2vec_output_model", "./data/processed/word2vec_output_model.model", "Word2vec_output_model.")
 tf.flags.DEFINE_string("word2vec_output_vec", "./data/processed/word2vec_output_vec.vector", "Word2vec_output_vec.")
-# tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
-tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.txt", "vocab_processor.")
+tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
+# tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.txt", "vocab_processor.")
 
 
 
