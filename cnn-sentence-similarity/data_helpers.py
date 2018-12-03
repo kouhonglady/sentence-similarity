@@ -6,7 +6,7 @@ import jieba as jb
 
 
 def sentence_to_word(train_data_path,train_data_s1_path,train_data_s2_path):
-    train_data = pd.read_excel(train_data_path)
+    train_data = pd.read_csv(train_data_path)
     print(train_data.shape)
     # 非中文和数字字符 \u0030-\u0039 数字0-9  \u4e00-\u9fa5 所有中文字符
     pattern = re.compile(r'[^\u4e00-\u9fa5]')
@@ -34,7 +34,7 @@ def load_data_and_labels(train_data_s1_path, train_data_s2_path,train_data_path)
     train_data_s2 = list(open(train_data_s2_path, "r", encoding='utf-8').readlines())
     x_text_s2 = [s.strip() for s in train_data_s2]
 
-    train_data = pd.read_excel(train_data_path)
+    train_data = pd.read_csv(train_data_path)
     y_train = train_data['res']
     y_temp  = [[0, 1] if t is 1 else [1, 0] for t in y_train]
     y = np.concatenate([y_temp, ], 0)

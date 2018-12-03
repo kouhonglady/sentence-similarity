@@ -8,13 +8,13 @@ import numpy as np
 
 
 # root_path 路径
-root_path = r'E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\pattern_demo\data\data20181115_old'
+root_path = r'./data'
 
 # original 数据
 # data_path:训练数据的路径、训练数据的格式为(q1,q2,res).
 #           q1:句子一、q2:句子二、res:若句子一与句子二表示相同语义为1，不同语义为0
 # word_dict :停用词文件路径、停用词格式为一行一个停用词，包括一些符号以及一些搭配
-data_path = root_path + r'/original/test_new_train.xlsx'
+data_path = root_path + r'/original/train.csv'
 word_dict = root_path + r'/original/Chinese_stopwords.txt'
 
 # dataset 数据
@@ -26,13 +26,13 @@ word_dict = root_path + r'/original/Chinese_stopwords.txt'
 # pairs_features :训练数据集的句子对，被转换为稀疏矩阵储存位置。文件第一行为特征总数。从第二行开始每一行表示一个句子对的特征表示。
 # result_path :运行结果保存路径
 # model_path :训练完成模型的保存路径
-sentence_word_q1 = root_path + r'/dataset/train_15_word_q1.txt'
-sentence_word_q2 = root_path + r'/dataset/train_15_word_q2.txt'
-word_to_pattern = root_path + r'/dataset/word_to_pattern.txt'
-final_pattern = root_path + r'/dataset/final_pattern.txt'
-pairs_features = root_path + r'/dataset/pairs_features.txt'
-result_path = root_path + r'/result.txt'
-model_path = root_path + r'/model_weizhong.txt'
+sentence_word_q1 = root_path + r'/processed/train_15_word_q1.txt'
+sentence_word_q2 = root_path + r'/processed/train_15_word_q2.txt'
+word_to_pattern = root_path + r'/processed/word_to_pattern.txt'
+final_pattern = root_path + r'/processed/final_pattern.txt'
+pairs_features = root_path + r'/processed/pairs_features.txt'
+result_path = root_path + r'/processed/result.txt'
+model_path = root_path + r'/processed/model_weizhong.txt'
 
 
 # temp_data 数据
@@ -44,10 +44,10 @@ model_path = root_path + r'/model_weizhong.txt'
 #                      但在此处句子对特征为one hot编码，由此具体值全都为1
 # data_y_path :训练数据集的标签（res）保存路径，因为我们在对句子对提取模式特征的过程中可能导致，句子对没有我们想要提取的
 #              特征，由此将导致训练数据集的标签位错位，我们将没有提取到特征的句子对的标签去除。得到了最后的训练标签。
-features_data_path = root_path + r'\dataset\temp_data\features_data.csv'
-row_ind_path = root_path + r'\dataset\temp_data\row_ind.csv'
-col_ind_path = root_path + r'\dataset\temp_data\col_ind.csv'
-data_y_path = root_path + r'\dataset\temp_data\data_y.csv'
+features_data_path = root_path + r'\processed\temp_data\features_data.csv'
+row_ind_path = root_path + r'\processed\temp_data\row_ind.csv'
+col_ind_path = root_path + r'\processed\temp_data\col_ind.csv'
+data_y_path = root_path + r'\processed\temp_data\data_y.csv'
 
 
 
@@ -55,13 +55,13 @@ data_y_path = root_path + r'\dataset\temp_data\data_y.csv'
 # 所以在两个词中间加入间隔符 the_interval_in_pattern ，上述两个模式分别是 “微信###息”“微###信息”表示不同的模式
 the_interval_in_pattern = "###"
 
-dataset = pd.read_excel(data_path)
+dataset = pd.read_csv(data_path)
 data = dataset
 data_y_all = data['res']
 
-# M = 100000
-# data = dataset[0:M]
-# data_y_all = data_y_all[0:M]
+M = 10000
+data = dataset[0:M]
+data_y_all = data_y_all[0:M]
 
 #用来保存从所有数据中剔除的标签位置
 line_count_list = []
@@ -314,22 +314,10 @@ def step5_lr():
         cls.fit(x_train, y_train)
         LogisticRegression_y_pred = cls.predict(x_test)
 
-
-
         print(y_test)
         print(LogisticRegression_y_pred)
         np.savetxt(root_path + r"/LogisticRegression_y_pred.csv", LogisticRegression_y_pred, delimiter=",")
         print("LogisticRegression_y_pred step :%d  F1_score: %.10f" %(step ,f1_score(y_test, LogisticRegression_y_pred)))
-
-        # f = open(result_path,'w+',encoding = 'utf-8')
-        #
-        # f.write( "step :%d  F1_score: %.10f" %(step,f1_score(y_test, LogisticRegression_y_pred)))
-        #
-        # clf = SVC(gamma='auto')
-        # clf.fit(x_train, y_train)
-        # svm_y_pred = clf.predict(x_test)
-        # print("svm_y_pred step :%d  F1_score: %.10f" % (step, f1_score(y_test, svm_y_pred)))
-
 
     s = pickle.dumps(cls)
     f = open(model_path, 'wb')
@@ -339,7 +327,6 @@ def step5_lr():
 
 
 if __name__ == '__main__':
-
     step1_cut_sentence_to_words()
     step2_word_top_pattern()
     step3_pattern_filtering()

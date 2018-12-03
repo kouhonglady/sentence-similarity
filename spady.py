@@ -8,8 +8,11 @@ import os
 import math
 import pandas as pd
 
+## 这是一个工具文件，包括一些常用的函数
 
 
+
+##爬取建设银行官网，扩充问题库
 def spady():
     TOTAL_COUNT = 100000
 
@@ -115,6 +118,8 @@ def spady():
     driver.close()
 
 
+
+##去除文件里面的重复项，重复的内容保存第一项
 def removedup():
     data = pd.read_excel(r"test_new_train_1108.xls")
     print(data.shape)
@@ -125,6 +130,8 @@ def removedup():
     data.to_excel("test_new_train_1108.xls",index=False, header=True)
 
 
+
+##在百度知道找一些相似的问题，用问句进行检索，找出前四个
 def find_similary_question_on_baidu():
     data = pd.read_excel(r"test_new_pred_to_find_similarity.xlsx")
     print(data.shape)
@@ -170,6 +177,8 @@ def find_similary_question_on_baidu():
     result_data = pd.DataFrame(q1_q2_pairs)
     result_data.to_excel(r"test_new_pred_to_find_similarity_result.xlsx")
 
+
+#对文件里面长度不满足条件的句子对进行剔除
 def dealdata():
     data = pd.read_excel(r"test_new_pred_to_find_similarity_result.xlsx")
     print()
@@ -181,7 +190,6 @@ def dealdata():
 
 if __name__ == "__main__":
     # spady()
-
     # find_similary_question_on_baidu()
     # dealdata()
     # find_similary_question_on_baidu()

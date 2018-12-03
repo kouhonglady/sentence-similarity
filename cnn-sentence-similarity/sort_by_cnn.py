@@ -7,13 +7,17 @@ import jieba as jb
 from sklearn.externals import joblib
 import pickle
 
-
+## 这个文件主要用于 测试 CNN对
 tf.flags.DEFINE_string("test_new",r'E:\study\hrg_project\environment\dataset\precision_data\test_new1107.xls',"the path of the test file")
+
+##加载训练好的模型的路径
 tf.flags.DEFINE_string("meta_graph_path", r'E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\cnn-sentence-similarity\runs\1541636111\checkpoints\model-17020.meta', "the path of the model witch has been trained")
 tf.flags.DEFINE_string("latest_checkpoint", r"E:\study\hrg_project\bigDataCompetition\bank\sentence-similarity\cnn-sentence-similarity\runs\1541636111\checkpoints", "the path of the checkpoints files")
 tf.flags.DEFINE_string("vocab_processor", "./data/processed/vocab_processor.pickle", "vocab_processor.")
 FLAGS = tf.flags.FLAGS
 
+
+##加载模型进行排序，并且给出训练好的模型的准确率
 def load_model():
     dataset = pd.read_excel(FLAGS.test_new)
     length = len(dataset)
@@ -102,19 +106,6 @@ def load_model():
 
         result = rescorse_softmax.eval()
         np.savetxt('./result.csv', result, delimiter=",")
-        # total = 0
-        # for i in range(length):
-        #     sten1 = dataset.ix[i]['q2_ques_top'].strip('_').split("_")
-        #     temp_max  = -1
-        #     pos = total
-        #     for item in sten1:
-        #         if result[total][0]> temp_max:
-        #             temp_max = result[total][0]
-        #             pos = total
-        #         total += 1
-        #     print(pos,result[pos][0])
-        #     best_q2.append(q2_ques_top[pos])
-        #     best_q2_ans.append(q2_ans_top[pos])
 
 
         total = 0
@@ -130,8 +121,6 @@ def load_model():
             print(pos,result[pos][1])
             best_q2.append(q2_ques_top[pos])
             best_q2_ans.append(q2_ans_top[pos])
-
-
 
 
         print("best_q2",len(best_q2))
@@ -157,6 +146,9 @@ def load_model():
         print(length)
         print("the total_count_ans: %f "%(total_count_ans / length))
         print("the total_count_ques: %f "%(total_count_ques / length))
+
+
+
 
 def save_train_data():
     dataset = pd.read_excel(FLAGS.test_new)
@@ -192,9 +184,10 @@ def save_train_data():
     dataframe.to_csv("data_train_net.csv")
 
 
+
+## 用于计算没有经过算法排序，就Lucene检索的baseline
 def find_base_line():
-    # dataset = pd.read_excel(FLAGS.test_new)
-    dataset = pd.read_excel(r"E:\study\hrg_project\backup\hrg_project20181024\test_new_pred.xlsx")
+    dataset = pd.read_excel(FLAGS.test_new)
     length = len(dataset)
     q1_ans_top = []
     q2_ans_top = []
